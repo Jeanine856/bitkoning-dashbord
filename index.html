@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bitcoin Halving Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d0d0d;
+      color: #f0f0f0;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #f7931a;
+      letter-spacing: 1px;
+    }
+
+    header p {
+      margin-top: 8px;
+      color: #888;
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      width: 100%;
+      max-width: 960px;
+    }
+
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+    }
+
+    .card-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+
+    .price {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: #f7931a;
+    }
+
+    .price-sub {
+      font-size: 0.85rem;
+      color: #555;
+      margin-top: 6px;
+    }
+
+    .change {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .change.up   { background: #0f3d1f; color: #2ecc71; }
+    .change.down { background: #3d0f0f; color: #e74c3c; }
+
+    .card.full {
+      grid-column: 1 / -1;
+    }
+
+    .countdown-row {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .time-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 70px;
+    }
+
+    .time-value {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #f7931a;
+      line-height: 1;
+    }
+
+    .time-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #666;
+      margin-top: 6px;
+    }
+
+    .separator {
+      font-size: 2.4rem;
+      color: #333;
+      align-self: center;
+      padding-bottom: 14px;
+    }
+
+    .halving-info {
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .halving-info span {
+      color: #888;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #2ecc71;
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    .live-label {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 6px;
+    }
+
+    footer {
+      margin-top: 60px;
+      font-size: 0.75rem;
+      color: #444;
+      text-align: center;
+    }
+
+    footer a { color: #666; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>&#x20BF; Bitcoin Dashboard</h1>
+  <p>Live prijs &amp; aftelling naar de volgende halving</p>
+</header>
+
+<div class="grid">
+
+  <div class="card full">
+    <div class="card-label">Volgende Bitcoin Halving</div>
+    <div class="countdown-row">
+      <div class="time-block">
+        <span class="time-value" id="days">--</span>
+        <span class="time-label">dagen</span>
+      </div>
+      <div class="separator">:</div>
+      <div class="time-block">
+        <span class="time-value" id="hours">--</span>
+        <span class="time-label">uren</span>
+      </div>
+      <div class="separator">:</div>
+      <div class="time-block">
+        <span class="time-value" id="minutes">--</span>
+        <span class="time-label">minuten</span>
+      </div>
+      <div class="separator">:</div>
+      <div class="time-block">
+        <span class="time-value" id="seconds">--</span>
+        <span class="time-label">seconden</span>
+      </div>
+    </div>
+    <div class="halving-info">
+      Verwachte datum: <span>~20 april 2028</span> &nbsp;&bull;&nbsp; Blok: <span>1.050.000</span><br>
+      Na de halving daalt de beloning van <span>3,125 BTC</span> naar <span>1,5625 BTC</span> per blok
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Bitcoin prijs (USD)</div>
+    <div class="price" id="price-usd">laden...</div>
+    <div class="change" id="change-usd"></div>
+    <div class="live-label"><span class="status-dot"></span>live</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Bitcoin prijs (EUR)</div>
+    <div class="price" id="price-eur">laden...</div>
+    <div class="change" id="change-eur"></div>
+    <div class="live-label"><span class="status-dot"></span>live</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Marktkapitalisatie (USD)</div>
+    <div class="price" id="market-cap">laden...</div>
+    <div class="price-sub">totale waarde alle BTC</div>
+  </div>
+
+</div>
+
+<footer>
+  Prijsdata via <a href="https://www.coingecko.com" target="_blank">CoinGecko</a> &nbsp;&bull;&nbsp; vernieuwd elke 30 seconden
+</footer>
+
+<script>
+  // Halving countdown: verwacht ~20 april 2028 (blok 1.050.000)
+  const HALVING_DATE = new Date('2028-04-20T00:00:00Z');
+
+  function updateCountdown() {
+    const diff = HALVING_DATE - new Date();
+    if (diff <= 0) {
+      ['days','hours','minutes','seconds'].forEach(id => document.getElementById(id).textContent = '0');
+      return;
+    }
+    document.getElementById('days').textContent    = Math.floor(diff / 864e5);
+    document.getElementById('hours').textContent   = String(Math.floor((diff % 864e5) / 36e5)).padStart(2,'0');
+    document.getElementById('minutes').textContent = String(Math.floor((diff % 36e5) / 6e4)).padStart(2,'0');
+    document.getElementById('seconds').textContent = String(Math.floor((diff % 6e4) / 1e3)).padStart(2,'0');
+  }
+  setInterval(updateCountdown, 1000);
+  updateCountdown();
+
+  // Live prijs via CoinGecko
+  function formatPrice(val, cur) {
+    return new Intl.NumberFormat('nl-NL', { style:'currency', currency:cur, maximumFractionDigits:0 }).format(val);
+  }
+
+  function formatCap(val) {
+    if (val >= 1e12) return '$' + (val/1e12).toFixed(2) + ' biljoen';
+    if (val >= 1e9)  return '$' + (val/1e9).toFixed(0)  + ' miljard';
+    return '$' + val.toLocaleString('nl-NL');
+  }
+
+  function setChange(id, pct) {
+    const el = document.getElementById(id);
+    el.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '% (24u)';
+    el.className = 'change ' + (pct >= 0 ? 'up' : 'down');
+  }
+
+  async function fetchPrice() {
+    try {
+      const res  = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur&include_24hr_change=true&include_market_cap=true');
+      const data = await res.json();
+      const b    = data.bitcoin;
+      document.getElementById('price-usd').textContent  = formatPrice(b.usd, 'USD');
+      document.getElementById('price-eur').textContent  = formatPrice(b.eur, 'EUR');
+      document.getElementById('market-cap').textContent = formatCap(b.usd_market_cap);
+      setChange('change-usd', b.usd_24h_change);
+      setChange('change-eur', b.eur_24h_change);
+    } catch(e) {
+      ['price-usd','price-eur','market-cap'].forEach(id => document.getElementById(id).textContent = 'fout bij laden');
+    }
+  }
+  fetchPrice();
+  setInterval(fetchPrice, 30000);
+</script>
+
+</body>
+</html>

@@ -16,69 +16,67 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 20px;
+      padding: 24px 16px;
     }
 
     header {
       text-align: center;
-      margin-bottom: 48px;
+      margin-bottom: 28px;
     }
 
     header h1 {
-      font-size: 2.2rem;
+      font-size: 1.6rem;
       font-weight: 700;
       color: #f7931a;
       letter-spacing: 1px;
     }
 
     header p {
-      margin-top: 8px;
+      margin-top: 6px;
       color: #888;
-      font-size: 0.95rem;
+      font-size: 0.85rem;
     }
 
     .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
       width: 100%;
-      max-width: 1000px;
+      max-width: 480px;
     }
 
     .card {
       background: #1a1a1a;
       border: 1px solid #2a2a2a;
       border-radius: 16px;
-      padding: 32px 24px;
+      padding: 24px 20px;
       text-align: center;
     }
 
-    .card.full { grid-column: 1 / -1; }
-
     .card-label {
-      font-size: 0.8rem;
+      font-size: 0.72rem;
       text-transform: uppercase;
       letter-spacing: 2px;
       color: #888;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .price {
-      font-size: 2.4rem;
+      font-size: 2rem;
       font-weight: 700;
       color: #f7931a;
     }
 
     .price-sub {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: #555;
-      margin-top: 6px;
+      margin-top: 5px;
     }
 
     .change {
       display: inline-block;
-      margin-top: 10px;
-      font-size: 0.9rem;
+      margin-top: 8px;
+      font-size: 0.85rem;
       font-weight: 600;
       padding: 3px 10px;
       border-radius: 20px;
@@ -86,44 +84,51 @@
     .change.up   { background: #0f3d1f; color: #2ecc71; }
     .change.down { background: #3d0f0f; color: #e74c3c; }
 
+    /* Prijskaarten naast elkaar */
+    .price-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
     /* Countdown */
     .countdown-row {
       display: flex;
       justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin-top: 8px;
+      gap: 10px;
+      flex-wrap: nowrap;
+      margin-top: 6px;
     }
     .time-block {
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-width: 70px;
+      flex: 1;
     }
     .time-value {
-      font-size: 3rem;
+      font-size: 2.2rem;
       font-weight: 700;
       color: #f7931a;
       line-height: 1;
     }
     .time-label {
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       text-transform: uppercase;
-      letter-spacing: 2px;
+      letter-spacing: 1.5px;
       color: #666;
-      margin-top: 6px;
+      margin-top: 5px;
     }
     .separator {
-      font-size: 2.4rem;
+      font-size: 1.8rem;
       color: #333;
       align-self: center;
       padding-bottom: 14px;
     }
     .halving-info {
-      margin-top: 20px;
-      font-size: 0.85rem;
+      margin-top: 16px;
+      font-size: 0.78rem;
       color: #555;
-      line-height: 1.8;
+      line-height: 1.9;
     }
     .halving-info span { color: #888; }
 
@@ -132,23 +137,21 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      gap: 10px;
+      margin-bottom: 16px;
     }
     .chart-header .card-label { margin-bottom: 0; }
-    .range-btns { display: flex; gap: 8px; }
+    .range-btns { display: flex; gap: 6px; }
     .range-btn {
       background: #2a2a2a;
       border: 1px solid #333;
       color: #888;
-      font-size: 0.75rem;
-      padding: 4px 12px;
+      font-size: 0.7rem;
+      padding: 4px 10px;
       border-radius: 20px;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .range-btn:hover, .range-btn.active {
+    .range-btn.active, .range-btn:active {
       background: #f7931a;
       border-color: #f7931a;
       color: #000;
@@ -156,36 +159,37 @@
     }
     .chart-wrap {
       position: relative;
-      height: 260px;
+      height: 200px;
     }
     #chartStatus {
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       color: #555;
-      margin-top: 10px;
+      margin-top: 8px;
       text-align: right;
     }
 
     /* Live dot */
     .status-dot {
       display: inline-block;
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #2ecc71;
-      margin-right: 6px;
+      margin-right: 5px;
       animation: pulse 2s infinite;
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50%       { opacity: 0.3; }
     }
-    .live-label { font-size: 0.75rem; color: #666; margin-top: 6px; }
+    .live-label { font-size: 0.7rem; color: #666; margin-top: 5px; }
 
     footer {
-      margin-top: 60px;
-      font-size: 0.75rem;
+      margin-top: 40px;
+      font-size: 0.7rem;
       color: #444;
       text-align: center;
+      padding-bottom: 20px;
     }
     footer a { color: #666; text-decoration: none; }
   </style>
@@ -200,50 +204,50 @@
 <div class="grid">
 
   <!-- Aftelling -->
-  <div class="card full">
+  <div class="card">
     <div class="card-label">Volgende Bitcoin Halving</div>
     <div class="countdown-row">
       <div class="time-block"><span class="time-value" id="days">--</span><span class="time-label">dagen</span></div>
       <div class="separator">:</div>
       <div class="time-block"><span class="time-value" id="hours">--</span><span class="time-label">uren</span></div>
       <div class="separator">:</div>
-      <div class="time-block"><span class="time-value" id="minutes">--</span><span class="time-label">minuten</span></div>
+      <div class="time-block"><span class="time-value" id="minutes">--</span><span class="time-label">min</span></div>
       <div class="separator">:</div>
-      <div class="time-block"><span class="time-value" id="seconds">--</span><span class="time-label">seconden</span></div>
+      <div class="time-block"><span class="time-value" id="seconds">--</span><span class="time-label">sec</span></div>
     </div>
     <div class="halving-info">
-      Verwachte datum: <span>~20 april 2028</span> &nbsp;&bull;&nbsp; Blok: <span>1.050.000</span><br>
-      Na de halving daalt de beloning van <span>3,125 BTC</span> naar <span>1,5625 BTC</span> per blok
+      Datum: <span>~20 april 2028</span> &bull; Blok: <span>1.050.000</span><br>
+      Beloning daalt: <span>3,125</span> &rarr; <span>1,5625 BTC</span>
     </div>
   </div>
 
-  <!-- Prijs USD -->
-  <div class="card">
-    <div class="card-label">Bitcoin prijs (USD)</div>
-    <div class="price" id="price-usd">laden...</div>
-    <div class="change" id="change-usd"></div>
-    <div class="live-label"><span class="status-dot"></span>live</div>
-  </div>
-
-  <!-- Prijs EUR -->
-  <div class="card">
-    <div class="card-label">Bitcoin prijs (EUR)</div>
-    <div class="price" id="price-eur">laden...</div>
-    <div class="change" id="change-eur"></div>
-    <div class="live-label"><span class="status-dot"></span>live</div>
+  <!-- Prijzen naast elkaar -->
+  <div class="price-row">
+    <div class="card">
+      <div class="card-label">USD</div>
+      <div class="price" id="price-usd">...</div>
+      <div class="change" id="change-usd"></div>
+      <div class="live-label"><span class="status-dot"></span>live</div>
+    </div>
+    <div class="card">
+      <div class="card-label">EUR</div>
+      <div class="price" id="price-eur">...</div>
+      <div class="change" id="change-eur"></div>
+      <div class="live-label"><span class="status-dot"></span>live</div>
+    </div>
   </div>
 
   <!-- Marktkapitalisatie -->
   <div class="card">
     <div class="card-label">Marktkapitalisatie (USD)</div>
-    <div class="price" id="market-cap">laden...</div>
+    <div class="price" id="market-cap">...</div>
     <div class="price-sub">totale waarde alle BTC</div>
   </div>
 
   <!-- Chart -->
-  <div class="card full">
+  <div class="card">
     <div class="chart-header">
-      <div class="card-label">Bitcoin koers (USD)</div>
+      <div class="card-label">Koers (USD)</div>
       <div class="range-btns">
         <button class="range-btn" data-days="1">24u</button>
         <button class="range-btn active" data-days="7">7d</button>
@@ -260,14 +264,13 @@
 </div>
 
 <footer>
-  Prijsdata via <a href="https://www.coingecko.com" target="_blank">CoinGecko</a>
-  &nbsp;&bull;&nbsp; prijzen vernieuwd elke 30s &nbsp;&bull;&nbsp; grafiek vernieuwd elke 5 min
+  Data via <a href="https://www.coingecko.com" target="_blank">CoinGecko</a>
+  &bull; prijs elke 30s &bull; grafiek elke 5 min
 </footer>
 
 <script>
   // === Aftelling ===
   const HALVING_DATE = new Date('2028-04-20T00:00:00Z');
-
   function updateCountdown() {
     const diff = HALVING_DATE - new Date();
     if (diff <= 0) {
@@ -293,7 +296,7 @@
   }
   function setChange(id, pct) {
     const el = document.getElementById(id);
-    el.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '% (24u)';
+    el.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
     el.className = 'change ' + (pct >= 0 ? 'up' : 'down');
   }
   async function fetchPrice() {
@@ -307,7 +310,7 @@
       setChange('change-usd', b.usd_24h_change);
       setChange('change-eur', b.eur_24h_change);
     } catch(e) {
-      ['price-usd','price-eur','market-cap'].forEach(id => document.getElementById(id).textContent = 'fout bij laden');
+      ['price-usd','price-eur'].forEach(id => document.getElementById(id).textContent = 'fout');
     }
   }
   fetchPrice();
@@ -318,25 +321,17 @@
   let chart = null;
   let currentDays = 7;
 
-  const gradient = ctx.createLinearGradient(0, 0, 0, 260);
-  gradient.addColorStop(0, 'rgba(247,147,26,0.35)');
-  gradient.addColorStop(1, 'rgba(247,147,26,0.00)');
-
   function buildChart(labels, prices) {
+    const grad = ctx.createLinearGradient(0, 0, 0, 200);
+    grad.addColorStop(0, 'rgba(247,147,26,0.35)');
+    grad.addColorStop(1, 'rgba(247,147,26,0.00)');
     if (chart) chart.destroy();
     chart = new Chart(ctx, {
       type: 'line',
       data: {
         labels,
-        datasets: [{
-          data: prices,
-          borderColor: '#f7931a',
-          borderWidth: 2,
-          backgroundColor: gradient,
-          fill: true,
-          pointRadius: 0,
-          tension: 0.3,
-        }]
+        datasets: [{ data: prices, borderColor: '#f7931a', borderWidth: 2,
+          backgroundColor: grad, fill: true, pointRadius: 0, tension: 0.3 }]
       },
       options: {
         responsive: true,
@@ -345,29 +340,15 @@
         plugins: {
           legend: { display: false },
           tooltip: {
-            callbacks: {
-              label: ctx => fmtPrice(ctx.parsed.y, 'USD')
-            },
-            backgroundColor: '#1a1a1a',
-            borderColor: '#333',
-            borderWidth: 1,
-            titleColor: '#888',
-            bodyColor: '#f7931a',
+            callbacks: { label: c => fmtPrice(c.parsed.y, 'USD') },
+            backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1,
+            titleColor: '#888', bodyColor: '#f7931a',
           }
         },
         scales: {
-          x: {
-            grid: { color: '#1f1f1f' },
-            ticks: { color: '#555', maxTicksLimit: 8, maxRotation: 0 }
-          },
-          y: {
-            position: 'right',
-            grid: { color: '#1f1f1f' },
-            ticks: {
-              color: '#555',
-              callback: val => '$' + (val >= 1000 ? (val/1000).toFixed(0) + 'k' : val)
-            }
-          }
+          x: { grid: { color: '#1f1f1f' }, ticks: { color: '#555', maxTicksLimit: 5, maxRotation: 0 } },
+          y: { position: 'right', grid: { color: '#1f1f1f' },
+            ticks: { color: '#555', callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v) } }
         }
       }
     });
@@ -379,27 +360,19 @@
       const res  = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`);
       const data = await res.json();
       const prices = data.prices;
-
-      const isHourly = days <= 1;
-      const isDaily  = days <= 30;
-
       const labels = prices.map(p => {
         const d = new Date(p[0]);
-        if (isHourly) return d.toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
-        if (isDaily)  return d.toLocaleDateString('nl-NL', { day:'numeric', month:'short' });
+        if (days <= 1)  return d.toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
         return d.toLocaleDateString('nl-NL', { day:'numeric', month:'short' });
       });
-
       buildChart(labels, prices.map(p => p[1]));
-      const now = new Date();
       document.getElementById('chartStatus').textContent =
-        'Bijgewerkt: ' + now.toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
+        'Bijgewerkt: ' + new Date().toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
     } catch(e) {
       document.getElementById('chartStatus').textContent = 'Fout bij laden grafiek';
     }
   }
 
-  // Range buttons
   document.querySelectorAll('.range-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
@@ -410,7 +383,7 @@
   });
 
   fetchChart(currentDays);
-  setInterval(() => fetchChart(currentDays), 300000); // elke 5 min
+  setInterval(() => fetchChart(currentDays), 300000);
 </script>
 
 </body>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bitcoin Halving Dashboard</title>
+  <title>Bitcoin Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -21,30 +21,62 @@
 
     header {
       text-align: center;
-      margin-bottom: 28px;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 480px;
     }
-
     header h1 {
       font-size: 1.6rem;
       font-weight: 700;
       color: #f7931a;
       letter-spacing: 1px;
     }
-
     header p {
       margin-top: 6px;
       color: #888;
       font-size: 0.85rem;
     }
 
-    .grid {
+    /* ── Navigatie tabs ── */
+    .nav-tabs {
       display: flex;
-      flex-direction: column;
-      gap: 16px;
       width: 100%;
       max-width: 480px;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 20px;
+      gap: 4px;
     }
+    .nav-tab {
+      flex: 1;
+      padding: 10px 8px;
+      background: none;
+      border: none;
+      border-radius: 9px;
+      color: #666;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .nav-tab.active {
+      background: #f7931a;
+      color: #000;
+    }
+    .nav-tab:not(.active):hover { color: #aaa; }
+    .nav-tab .tab-icon { font-size: 1rem; }
 
+    /* ── Views ── */
+    .view { display: none; width: 100%; max-width: 480px; }
+    .view.active { display: flex; flex-direction: column; gap: 16px; }
+
+    /* ── Cards ── */
     .card {
       background: #1a1a1a;
       border: 1px solid #2a2a2a;
@@ -52,7 +84,6 @@
       padding: 24px 20px;
       text-align: center;
     }
-
     .card-label {
       font-size: 0.72rem;
       text-transform: uppercase;
@@ -60,19 +91,12 @@
       color: #888;
       margin-bottom: 10px;
     }
-
     .price {
       font-size: 2rem;
       font-weight: 700;
       color: #f7931a;
     }
-
-    .price-sub {
-      font-size: 0.8rem;
-      color: #555;
-      margin-top: 5px;
-    }
-
+    .price-sub { font-size: 0.8rem; color: #555; margin-top: 5px; }
     .change {
       display: inline-block;
       margin-top: 8px;
@@ -84,7 +108,6 @@
     .change.up   { background: #0f3d1f; color: #2ecc71; }
     .change.down { background: #3d0f0f; color: #e74c3c; }
 
-    /* Prijskaarten naast elkaar */
     .price-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -99,12 +122,7 @@
       flex-wrap: nowrap;
       margin-top: 6px;
     }
-    .time-block {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex: 1;
-    }
+    .time-block { display: flex; flex-direction: column; align-items: center; flex: 1; }
     .time-value {
       font-size: 2.2rem;
       font-weight: 700;
@@ -118,18 +136,8 @@
       color: #666;
       margin-top: 5px;
     }
-    .separator {
-      font-size: 1.8rem;
-      color: #333;
-      align-self: center;
-      padding-bottom: 14px;
-    }
-    .halving-info {
-      margin-top: 16px;
-      font-size: 0.78rem;
-      color: #555;
-      line-height: 1.9;
-    }
+    .separator { font-size: 1.8rem; color: #333; align-self: center; padding-bottom: 14px; }
+    .halving-info { margin-top: 16px; font-size: 0.78rem; color: #555; line-height: 1.9; }
     .halving-info span { color: #888; }
 
     /* Chart */
@@ -157,18 +165,9 @@
       color: #000;
       font-weight: 700;
     }
-    .chart-wrap {
-      position: relative;
-      height: 200px;
-    }
-    #chartStatus {
-      font-size: 0.7rem;
-      color: #555;
-      margin-top: 8px;
-      text-align: right;
-    }
+    .chart-wrap { position: relative; height: 200px; }
+    #chartStatus { font-size: 0.7rem; color: #555; margin-top: 8px; text-align: right; }
 
-    /* Live dot */
     .status-dot {
       display: inline-block;
       width: 7px;
@@ -184,6 +183,268 @@
     }
     .live-label { font-size: 0.7rem; color: #666; margin-top: 5px; }
 
+    /* ── Wallet Tracker ── */
+    .search-box {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .search-input {
+      flex: 1;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 11px 14px;
+      color: #f0f0f0;
+      font-size: 0.82rem;
+      font-family: 'Segoe UI', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: #f7931a; }
+    .search-input::placeholder { color: #444; }
+    .btn-primary {
+      background: #f7931a;
+      border: none;
+      border-radius: 10px;
+      color: #000;
+      font-weight: 700;
+      font-size: 0.82rem;
+      padding: 11px 18px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .wallet-result { text-align: left; }
+    .wallet-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .wallet-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #f7931a22;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .wallet-addr {
+      font-size: 0.72rem;
+      color: #888;
+      font-family: monospace;
+      word-break: break-all;
+    }
+    .wallet-chain-badge {
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .badge-btc { background: #f7931a22; color: #f7931a; }
+    .badge-eth { background: #627eea22; color: #627eea; }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .stat-box {
+      background: #111;
+      border: 1px solid #252525;
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+    .stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; color: #555; margin-bottom: 5px; }
+    .stat-value { font-size: 1.1rem; font-weight: 700; color: #f0f0f0; }
+    .stat-value.orange { color: #f7931a; }
+    .stat-value.green  { color: #2ecc71; }
+    .stat-value.red    { color: #e74c3c; }
+
+    .tx-list { list-style: none; }
+    .tx-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #1f1f1f;
+      gap: 8px;
+    }
+    .tx-item:last-child { border-bottom: none; }
+    .tx-left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+    .tx-arrow {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+    .tx-arrow.in  { background: #0f3d1f; color: #2ecc71; }
+    .tx-arrow.out { background: #3d0f0f; color: #e74c3c; }
+    .tx-date { font-size: 0.72rem; color: #555; }
+    .tx-hash { font-size: 0.68rem; color: #333; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+    .tx-amount { font-size: 0.85rem; font-weight: 700; white-space: nowrap; }
+    .tx-amount.in  { color: #2ecc71; }
+    .tx-amount.out { color: #e74c3c; }
+
+    .section-title {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    /* ── Influencer Scanner ── */
+    .scanner-form { display: flex; flex-direction: column; gap: 10px; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: #666; }
+
+    .coin-select-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .coin-btn {
+      background: #2a2a2a;
+      border: 1px solid #333;
+      color: #888;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .coin-btn.active { background: #f7931a; border-color: #f7931a; color: #000; }
+
+    /* Risico score */
+    .risk-card { text-align: left; }
+    .risk-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+    .risk-score-wrap { text-align: center; }
+    .risk-score {
+      font-size: 2.8rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .risk-score.low    { color: #2ecc71; }
+    .risk-score.medium { color: #f39c12; }
+    .risk-score.high   { color: #e74c3c; }
+    .risk-label-text { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; color: #555; margin-top: 4px; }
+    .influencer-info { flex: 1; }
+    .influencer-handle { font-size: 1rem; font-weight: 700; color: #f0f0f0; }
+    .influencer-sub { font-size: 0.75rem; color: #666; margin-top: 2px; }
+
+    /* Gauge bar */
+    .risk-bar-wrap { margin: 12px 0; }
+    .risk-bar-bg {
+      height: 6px;
+      background: linear-gradient(to right, #2ecc71, #f39c12, #e74c3c);
+      border-radius: 3px;
+      position: relative;
+    }
+    .risk-bar-needle {
+      position: absolute;
+      top: -4px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid #0d0d0d;
+      transform: translateX(-50%);
+      transition: left 0.6s ease;
+    }
+
+    /* Signalen */
+    .signals-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+    .signal-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #111;
+      border: 1px solid #222;
+    }
+    .signal-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+    .signal-title { font-size: 0.82rem; font-weight: 600; color: #f0f0f0; }
+    .signal-desc  { font-size: 0.72rem; color: #666; margin-top: 2px; line-height: 1.4; }
+    .signal-item.danger  { border-color: #3d0f0f; }
+    .signal-item.warning { border-color: #3d2800; }
+    .signal-item.safe    { border-color: #0f3d1f; }
+
+    /* Tijdlijn correlatie */
+    .timeline-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 8px 0;
+      border-bottom: 1px solid #1a1a1a;
+      position: relative;
+    }
+    .timeline-item:last-child { border-bottom: none; }
+    .timeline-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+    .timeline-dot.sell   { background: #e74c3c; }
+    .timeline-dot.buy    { background: #2ecc71; }
+    .timeline-dot.post   { background: #627eea; }
+    .timeline-dot.alert  { background: #f39c12; }
+    .timeline-text { flex: 1; }
+    .timeline-event { font-size: 0.8rem; color: #ccc; }
+    .timeline-meta  { font-size: 0.68rem; color: #555; margin-top: 2px; }
+    .timeline-flag  {
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .flag-dump    { background: #3d0f0f; color: #e74c3c; }
+    .flag-clean   { background: #0f3d1f; color: #2ecc71; }
+    .flag-suspect { background: #3d2800; color: #f39c12; }
+
+    /* Empty / loading state */
+    .empty-state {
+      text-align: center;
+      padding: 32px 20px;
+      color: #444;
+    }
+    .empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
+    .empty-text { font-size: 0.85rem; color: #555; }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #333;
+      border-top-color: #f7931a;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hint-text { font-size: 0.72rem; color: #444; margin-top: 4px; }
+
     footer {
       margin-top: 40px;
       font-size: 0.7rem;
@@ -192,18 +453,49 @@
       padding-bottom: 20px;
     }
     footer a { color: #666; text-decoration: none; }
+
+    .divider {
+      height: 1px;
+      background: #1f1f1f;
+      margin: 12px 0;
+    }
+
+    .info-banner {
+      background: #1a1a00;
+      border: 1px solid #3a3a00;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.75rem;
+      color: #888;
+      line-height: 1.5;
+      text-align: left;
+    }
+    .info-banner strong { color: #f39c12; }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>&#x20BF; Bitcoin Dashboard</h1>
-  <p>Live prijs &amp; aftelling naar de volgende halving</p>
+  <h1>&#x20BF; Bitkoning</h1>
+  <p>Dashboard &amp; Wallet Tracker</p>
 </header>
 
-<div class="grid">
+<!-- Navigatie -->
+<nav class="nav-tabs">
+  <button class="nav-tab active" data-view="dashboard" onclick="switchView('dashboard')">
+    <span class="tab-icon">📊</span> Dashboard
+  </button>
+  <button class="nav-tab" data-view="wallet" onclick="switchView('wallet')">
+    <span class="tab-icon">👛</span> Wallet Tracker
+  </button>
+  <button class="nav-tab" data-view="scanner" onclick="switchView('scanner')">
+    <span class="tab-icon">🔍</span> Influencer Scan
+  </button>
+</nav>
 
-  <!-- Aftelling -->
+<!-- ═══════════════ VIEW: DASHBOARD ═══════════════ -->
+<div class="view active" id="view-dashboard">
+
   <div class="card">
     <div class="card-label">Volgende Bitcoin Halving</div>
     <div class="countdown-row">
@@ -221,7 +513,6 @@
     </div>
   </div>
 
-  <!-- Prijzen naast elkaar -->
   <div class="price-row">
     <div class="card">
       <div class="card-label">USD</div>
@@ -237,14 +528,12 @@
     </div>
   </div>
 
-  <!-- Marktkapitalisatie -->
   <div class="card">
     <div class="card-label">Marktkapitalisatie (USD)</div>
     <div class="price" id="market-cap">...</div>
     <div class="price-sub">totale waarde alle BTC</div>
   </div>
 
-  <!-- Chart -->
   <div class="card">
     <div class="chart-header">
       <div class="card-label">Koers (USD)</div>
@@ -263,127 +552,665 @@
 
 </div>
 
+<!-- ═══════════════ VIEW: WALLET TRACKER ═══════════════ -->
+<div class="view" id="view-wallet">
+
+  <div class="card">
+    <div class="card-label">Wallet opzoeken</div>
+    <div style="margin-top:4px;">
+      <div class="search-box">
+        <input class="search-input" id="walletInput"
+          placeholder="BTC of ETH adres..." />
+        <button class="btn-primary" id="walletSearchBtn" onclick="searchWallet()">Zoek</button>
+      </div>
+      <div class="hint-text">Bijv. een Bitcoin (bc1...) of Ethereum (0x...) adres</div>
+    </div>
+  </div>
+
+  <div id="walletResult">
+    <div class="card">
+      <div class="empty-state">
+        <div class="empty-icon">👛</div>
+        <div class="empty-text">Voer een wallet adres in om transacties en saldo te bekijken</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ VIEW: INFLUENCER SCANNER ═══════════════ -->
+<div class="view" id="view-scanner">
+
+  <div class="info-banner">
+    <strong>Hoe werkt dit?</strong> Voer een Twitter/X handle en het bijbehorende blockchain adres in.
+    Het algoritme analyseert transactiepatronen om te detecteren of iemand verkoopt terwijl ze een coin promoten.
+  </div>
+
+  <div class="card">
+    <div class="card-label">Influencer Analyse</div>
+    <div class="scanner-form" style="margin-top: 8px;">
+
+      <div class="form-group">
+        <div class="form-label">Twitter / X Handle</div>
+        <input class="search-input" id="scanHandle" placeholder="@influencer" />
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">Blockchain Adres</div>
+        <input class="search-input" id="scanAddress" placeholder="BTC of ETH adres..." />
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">Netwerk</div>
+        <div class="coin-select-row" id="chainSelect">
+          <button class="coin-btn active" data-chain="btc" onclick="selectChain('btc')">₿ Bitcoin</button>
+          <button class="coin-btn" data-chain="eth" onclick="selectChain('eth')">Ξ Ethereum</button>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="scanBtn" onclick="runInfluencerScan()" style="width:100%;padding:13px;">
+        Analyseer gedrag
+      </button>
+
+    </div>
+  </div>
+
+  <div id="scanResult">
+    <div class="card">
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-text">Voer een handle en adres in om het handelsgedrag van een influencer te analyseren</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
 <footer>
   Data via <a href="https://www.coingecko.com" target="_blank">CoinGecko</a>
-  &bull; prijs elke 30s &bull; grafiek elke 5 min
+  &bull; <a href="https://mempool.space" target="_blank">Mempool.space</a>
+  &bull; prijs elke 30s
 </footer>
 
 <script>
-  // === Aftelling ===
-  const HALVING_DATE = new Date('2028-04-20T00:00:00Z');
-  function updateCountdown() {
-    const diff = HALVING_DATE - new Date();
-    if (diff <= 0) {
-      ['days','hours','minutes','seconds'].forEach(id => document.getElementById(id).textContent = '0');
-      return;
-    }
-    document.getElementById('days').textContent    = Math.floor(diff / 864e5);
-    document.getElementById('hours').textContent   = String(Math.floor((diff % 864e5) / 36e5)).padStart(2,'0');
-    document.getElementById('minutes').textContent = String(Math.floor((diff % 36e5) / 6e4)).padStart(2,'0');
-    document.getElementById('seconds').textContent = String(Math.floor((diff % 6e4) / 1e3)).padStart(2,'0');
-  }
-  setInterval(updateCountdown, 1000);
-  updateCountdown();
+// ═══════════════════════════════════════════════════
+// NAVIGATIE
+// ═══════════════════════════════════════════════════
+function switchView(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  document.querySelector('[data-view="' + view + '"]').classList.add('active');
+}
 
-  // === Live prijs ===
-  function fmtPrice(val, cur) {
-    return new Intl.NumberFormat('nl-NL', { style:'currency', currency:cur, maximumFractionDigits:0 }).format(val);
+// ═══════════════════════════════════════════════════
+// DASHBOARD — Aftelling
+// ═══════════════════════════════════════════════════
+const HALVING_DATE = new Date('2028-04-20T00:00:00Z');
+function updateCountdown() {
+  const diff = HALVING_DATE - new Date();
+  if (diff <= 0) {
+    ['days','hours','minutes','seconds'].forEach(id => document.getElementById(id).textContent = '0');
+    return;
   }
-  function fmtCap(val) {
-    if (val >= 1e12) return '$' + (val/1e12).toFixed(2) + ' biljoen';
-    if (val >= 1e9)  return '$' + (val/1e9).toFixed(0)  + ' miljard';
-    return '$' + val.toLocaleString('nl-NL');
-  }
-  function setChange(id, pct) {
-    const el = document.getElementById(id);
-    el.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
-    el.className = 'change ' + (pct >= 0 ? 'up' : 'down');
-  }
-  async function fetchPrice() {
-    try {
-      const res  = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur&include_24hr_change=true&include_market_cap=true');
-      const data = await res.json();
-      const b    = data.bitcoin;
-      document.getElementById('price-usd').textContent  = fmtPrice(b.usd, 'USD');
-      document.getElementById('price-eur').textContent  = fmtPrice(b.eur, 'EUR');
-      document.getElementById('market-cap').textContent = fmtCap(b.usd_market_cap);
-      setChange('change-usd', b.usd_24h_change);
-      setChange('change-eur', b.eur_24h_change);
-    } catch(e) {
-      ['price-usd','price-eur'].forEach(id => document.getElementById(id).textContent = 'fout');
-    }
-  }
-  fetchPrice();
-  setInterval(fetchPrice, 30000);
+  document.getElementById('days').textContent    = Math.floor(diff / 864e5);
+  document.getElementById('hours').textContent   = String(Math.floor((diff % 864e5) / 36e5)).padStart(2,'0');
+  document.getElementById('minutes').textContent = String(Math.floor((diff % 36e5) / 6e4)).padStart(2,'0');
+  document.getElementById('seconds').textContent = String(Math.floor((diff % 6e4) / 1e3)).padStart(2,'0');
+}
+setInterval(updateCountdown, 1000);
+updateCountdown();
 
-  // === Chart ===
-  const ctx = document.getElementById('btcChart').getContext('2d');
-  let chart = null;
-  let currentDays = 7;
+// ═══════════════════════════════════════════════════
+// DASHBOARD — Live prijs
+// ═══════════════════════════════════════════════════
+function fmtPrice(val, cur) {
+  return new Intl.NumberFormat('nl-NL', { style:'currency', currency:cur, maximumFractionDigits:0 }).format(val);
+}
+function fmtCap(val) {
+  if (val >= 1e12) return '$' + (val/1e12).toFixed(2) + ' biljoen';
+  if (val >= 1e9)  return '$' + (val/1e9).toFixed(0)  + ' miljard';
+  return '$' + val.toLocaleString('nl-NL');
+}
+function setChange(id, pct) {
+  const el = document.getElementById(id);
+  el.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+  el.className = 'change ' + (pct >= 0 ? 'up' : 'down');
+}
+async function fetchPrice() {
+  try {
+    const res  = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur&include_24hr_change=true&include_market_cap=true');
+    const data = await res.json();
+    const b    = data.bitcoin;
+    document.getElementById('price-usd').textContent  = fmtPrice(b.usd, 'USD');
+    document.getElementById('price-eur').textContent  = fmtPrice(b.eur, 'EUR');
+    document.getElementById('market-cap').textContent = fmtCap(b.usd_market_cap);
+    setChange('change-usd', b.usd_24h_change);
+    setChange('change-eur', b.eur_24h_change);
+  } catch(e) {
+    ['price-usd','price-eur'].forEach(id => document.getElementById(id).textContent = 'fout');
+  }
+}
+fetchPrice();
+setInterval(fetchPrice, 30000);
 
-  function buildChart(labels, prices) {
-    const grad = ctx.createLinearGradient(0, 0, 0, 200);
-    grad.addColorStop(0, 'rgba(247,147,26,0.35)');
-    grad.addColorStop(1, 'rgba(247,147,26,0.00)');
-    if (chart) chart.destroy();
-    chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{ data: prices, borderColor: '#f7931a', borderWidth: 2,
-          backgroundColor: grad, fill: true, pointRadius: 0, tension: 0.3 }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: { label: c => fmtPrice(c.parsed.y, 'USD') },
-            backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1,
-            titleColor: '#888', bodyColor: '#f7931a',
-          }
-        },
-        scales: {
-          x: { grid: { color: '#1f1f1f' }, ticks: { color: '#555', maxTicksLimit: 5, maxRotation: 0 } },
-          y: { position: 'right', grid: { color: '#1f1f1f' },
-            ticks: { color: '#555', callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v) } }
+// ═══════════════════════════════════════════════════
+// DASHBOARD — Chart
+// ═══════════════════════════════════════════════════
+const ctx = document.getElementById('btcChart').getContext('2d');
+let chart = null;
+let currentDays = 7;
+
+function buildChart(labels, prices) {
+  const grad = ctx.createLinearGradient(0, 0, 0, 200);
+  grad.addColorStop(0, 'rgba(247,147,26,0.35)');
+  grad.addColorStop(1, 'rgba(247,147,26,0.00)');
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{ data: prices, borderColor: '#f7931a', borderWidth: 2,
+        backgroundColor: grad, fill: true, pointRadius: 0, tension: 0.3 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: c => fmtPrice(c.parsed.y, 'USD') },
+          backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1,
+          titleColor: '#888', bodyColor: '#f7931a',
         }
+      },
+      scales: {
+        x: { grid: { color: '#1f1f1f' }, ticks: { color: '#555', maxTicksLimit: 5, maxRotation: 0 } },
+        y: { position: 'right', grid: { color: '#1f1f1f' },
+          ticks: { color: '#555', callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v) } }
       }
-    });
-  }
-
-  async function fetchChart(days) {
-    document.getElementById('chartStatus').textContent = 'laden...';
-    try {
-      const res  = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`);
-      const data = await res.json();
-      const prices = data.prices;
-      const labels = prices.map(p => {
-        const d = new Date(p[0]);
-        if (days <= 1)  return d.toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
-        return d.toLocaleDateString('nl-NL', { day:'numeric', month:'short' });
-      });
-      buildChart(labels, prices.map(p => p[1]));
-      document.getElementById('chartStatus').textContent =
-        'Bijgewerkt: ' + new Date().toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
-    } catch(e) {
-      document.getElementById('chartStatus').textContent = 'Fout bij laden grafiek';
     }
-  }
+  });
+}
 
-  document.querySelectorAll('.range-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentDays = parseInt(btn.dataset.days);
-      fetchChart(currentDays);
+async function fetchChart(days) {
+  document.getElementById('chartStatus').textContent = 'laden...';
+  try {
+    const res  = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`);
+    const data = await res.json();
+    const prices = data.prices;
+    const labels = prices.map(p => {
+      const d = new Date(p[0]);
+      if (days <= 1) return d.toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
+      return d.toLocaleDateString('nl-NL', { day:'numeric', month:'short' });
     });
+    buildChart(labels, prices.map(p => p[1]));
+    document.getElementById('chartStatus').textContent =
+      'Bijgewerkt: ' + new Date().toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
+  } catch(e) {
+    document.getElementById('chartStatus').textContent = 'Fout bij laden grafiek';
+  }
+}
+
+document.querySelectorAll('.range-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentDays = parseInt(btn.dataset.days);
+    fetchChart(currentDays);
+  });
+});
+fetchChart(currentDays);
+setInterval(() => fetchChart(currentDays), 300000);
+
+// ═══════════════════════════════════════════════════
+// WALLET TRACKER
+// ═══════════════════════════════════════════════════
+
+function detectChain(addr) {
+  if (/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,62}$/.test(addr)) return 'btc';
+  if (/^0x[0-9a-fA-F]{40}$/.test(addr)) return 'eth';
+  return null;
+}
+
+function fmtSat(sat) {
+  const btc = sat / 1e8;
+  return btc.toFixed(8).replace(/\.?0+$/, '') + ' BTC';
+}
+
+function fmtTimeAgo(ts) {
+  const sec = Math.floor((Date.now() / 1000) - ts);
+  if (sec < 60)   return sec + 's geleden';
+  if (sec < 3600) return Math.floor(sec/60) + 'm geleden';
+  if (sec < 86400) return Math.floor(sec/3600) + 'u geleden';
+  return Math.floor(sec/86400) + 'd geleden';
+}
+
+async function fetchBtcWallet(addr) {
+  const [addrRes, txRes] = await Promise.all([
+    fetch(`https://mempool.space/api/address/${addr}`),
+    fetch(`https://mempool.space/api/address/${addr}/txs`)
+  ]);
+  if (!addrRes.ok) throw new Error('Adres niet gevonden');
+  const addrData = await addrRes.json();
+  const txData   = await txRes.json();
+
+  const funded  = addrData.chain_stats.funded_txo_sum;
+  const spent   = addrData.chain_stats.spent_txo_sum;
+  const balance = funded - spent;
+  const txCount = addrData.chain_stats.tx_count;
+
+  const txs = txData.slice(0, 10).map(tx => {
+    let delta = 0;
+    tx.vout.forEach(v => { if (v.scriptpubkey_address === addr) delta += v.value; });
+    tx.vin.forEach(v => { if (v.prevout && v.prevout.scriptpubkey_address === addr) delta -= v.prevout.value; });
+    return {
+      txid: tx.txid,
+      delta,
+      time: tx.status.block_time || Math.floor(Date.now()/1000),
+      confirmed: tx.status.confirmed
+    };
   });
 
-  fetchChart(currentDays);
-  setInterval(() => fetchChart(currentDays), 300000);
+  return { chain: 'btc', balance, txCount, funded, spent, txs };
+}
+
+async function fetchEthWallet(addr) {
+  const res = await fetch(`https://api.ethplorer.io/getAddressInfo/${addr}?apiKey=freekey`);
+  if (!res.ok) throw new Error('Adres niet gevonden');
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message || 'Fout bij ophalen');
+
+  const ethBalance = data.ETH ? data.ETH.balance : 0;
+  const txCount    = data.ETH ? (data.countTxs || 0) : 0;
+
+  const txs = (data.ETH && data.ETH.transfers ? data.ETH.transfers.slice(0, 10) : []).map(tx => ({
+    txid: tx.transactionHash,
+    delta: tx.to && tx.to.toLowerCase() === addr.toLowerCase()
+      ? parseFloat(tx.value) / 1e18
+      : -(parseFloat(tx.value) / 1e18),
+    time: tx.timestamp,
+    confirmed: true
+  }));
+
+  return { chain: 'eth', balance: ethBalance, txCount, txs };
+}
+
+function renderWalletResult(data, addr) {
+  const chain  = data.chain;
+  const symbol = chain === 'btc' ? 'BTC' : 'ETH';
+  const icon   = chain === 'btc' ? '₿' : 'Ξ';
+  const balFmt = chain === 'btc'
+    ? (data.balance / 1e8).toFixed(6) + ' BTC'
+    : parseFloat(data.balance).toFixed(6) + ' ETH';
+
+  const shortAddr = addr.slice(0, 8) + '...' + addr.slice(-6);
+
+  let txsHtml = '';
+  if (data.txs.length === 0) {
+    txsHtml = '<div style="color:#555;font-size:0.8rem;text-align:center;padding:12px 0;">Geen transacties gevonden</div>';
+  } else {
+    txsHtml = '<ul class="tx-list">' + data.txs.map(tx => {
+      const isIn  = tx.delta >= 0;
+      const arrow = isIn ? '↓' : '↑';
+      const dir   = isIn ? 'in' : 'out';
+      const amtStr = chain === 'btc'
+        ? (Math.abs(tx.delta)/1e8).toFixed(6) + ' BTC'
+        : Math.abs(tx.delta).toFixed(4) + ' ETH';
+      const prefix = isIn ? '+' : '-';
+      return `
+        <li class="tx-item">
+          <div class="tx-left">
+            <div class="tx-arrow ${dir}">${arrow}</div>
+            <div>
+              <div class="tx-hash">${tx.txid.slice(0,18)}...</div>
+              <div class="tx-date">${fmtTimeAgo(tx.time)}</div>
+            </div>
+          </div>
+          <div class="tx-amount ${dir}">${prefix}${amtStr}</div>
+        </li>`;
+    }).join('') + '</ul>';
+  }
+
+  document.getElementById('walletResult').innerHTML = `
+    <div class="card wallet-result">
+      <div class="wallet-header">
+        <div class="wallet-icon">${icon}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="wallet-addr">${shortAddr}</div>
+        </div>
+        <span class="wallet-chain-badge badge-${chain}">${symbol}</span>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-label">Saldo</div>
+          <div class="stat-value orange">${balFmt}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Transacties</div>
+          <div class="stat-value">${data.txCount.toLocaleString('nl-NL')}</div>
+        </div>
+        ${chain === 'btc' ? `
+        <div class="stat-box">
+          <div class="stat-label">Ontvangen</div>
+          <div class="stat-value green">${(data.funded/1e8).toFixed(4)} BTC</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Verstuurd</div>
+          <div class="stat-value red">${(data.spent/1e8).toFixed(4)} BTC</div>
+        </div>` : ''}
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-title">Recente transacties</div>
+      ${txsHtml}
+    </div>`;
+}
+
+async function searchWallet() {
+  const addr = document.getElementById('walletInput').value.trim();
+  if (!addr) return;
+  const chain = detectChain(addr);
+  if (!chain) {
+    document.getElementById('walletResult').innerHTML = `
+      <div class="card"><div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-text">Ongeldig adres. Gebruik een BTC (bc1... of 1/3...) of ETH (0x...) adres.</div>
+      </div></div>`;
+    return;
+  }
+
+  document.getElementById('walletSearchBtn').disabled = true;
+  document.getElementById('walletResult').innerHTML = `
+    <div class="card"><div class="empty-state">
+      <span class="loading-spinner"></span>
+      <span style="color:#666;font-size:0.85rem;">Blockchain data ophalen...</span>
+    </div></div>`;
+
+  try {
+    const data = chain === 'btc'
+      ? await fetchBtcWallet(addr)
+      : await fetchEthWallet(addr);
+    renderWalletResult(data, addr);
+  } catch(e) {
+    document.getElementById('walletResult').innerHTML = `
+      <div class="card"><div class="empty-state">
+        <div class="empty-icon">❌</div>
+        <div class="empty-text">Fout: ${e.message}</div>
+      </div></div>`;
+  } finally {
+    document.getElementById('walletSearchBtn').disabled = false;
+  }
+}
+
+document.getElementById('walletInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') searchWallet();
+});
+
+// ═══════════════════════════════════════════════════
+// INFLUENCER SCANNER — Algoritme
+// ═══════════════════════════════════════════════════
+
+let selectedChain = 'btc';
+function selectChain(chain) {
+  selectedChain = chain;
+  document.querySelectorAll('#chainSelect .coin-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.chain === chain);
+  });
+}
+
+// Analyse algoritme: berekent risicosignalen op basis van on-chain data
+function analyseTransactions(txs, chain) {
+  const signals = [];
+  let riskScore = 0;
+
+  if (txs.length === 0) return { signals, riskScore: 0 };
+
+  const now = Date.now() / 1000;
+  const dag30 = now - 30 * 86400;
+
+  // Bereken nettostromen per transactie
+  const recentTxs = txs.filter(tx => tx.time >= dag30);
+  const outflows  = recentTxs.filter(tx => tx.delta < 0);
+  const inflows   = recentTxs.filter(tx => tx.delta > 0);
+
+  const totalOut = outflows.reduce((s, tx) => s + Math.abs(tx.delta), 0);
+  const totalIn  = inflows.reduce((s, tx) => s + tx.delta, 0);
+  const netFlow  = totalIn - totalOut;
+
+  // Signaal 1: Grote uitstroom de laatste 30 dagen
+  if (totalOut > 0 && totalOut > totalIn * 0.5) {
+    const pct = Math.round((totalOut / (totalIn + totalOut)) * 100);
+    riskScore += 35;
+    signals.push({
+      type: 'danger',
+      icon: '🔴',
+      title: 'Grote verkoopdruk gedetecteerd',
+      desc: `${pct}% van alle bewegingen in 30 dagen was een verkoop (uitstroom). Dit is een sterk dump-signaal.`
+    });
+  }
+
+  // Signaal 2: Frequente kleine verkopen (beetje bij beetje dumpen)
+  if (outflows.length >= 5) {
+    riskScore += 20;
+    signals.push({
+      type: 'warning',
+      icon: '🟡',
+      title: 'Gespreide verkopen',
+      desc: `${outflows.length} afzonderlijke verkooptransacties in 30 dagen. Kan duiden op systematisch dumpen om detectie te vermijden.`
+    });
+  }
+
+  // Signaal 3: Portemonnee wordt geleegd
+  const allOut = txs.reduce((s, tx) => tx.delta < 0 ? s + Math.abs(tx.delta) : s, 0);
+  const allIn  = txs.reduce((s, tx) => tx.delta > 0 ? s + tx.delta : s, 0);
+  const retentionRate = allIn > 0 ? (allIn - allOut) / allIn : 0;
+
+  if (retentionRate < 0.1 && allIn > 0) {
+    riskScore += 25;
+    signals.push({
+      type: 'danger',
+      icon: '🔴',
+      title: 'Portemonnee wordt geleegd',
+      desc: `Minder dan 10% van alle ontvangen coins wordt nog vastgehouden. Dit adres stuurt bijna alles door — mogelijk een distributieadres.`
+    });
+  }
+
+  // Signaal 4: Recente grote transactie vlak voor/na posting
+  const bigTxs = outflows.filter(tx => Math.abs(tx.delta) > (chain === 'btc' ? 0.1e8 : 0.5));
+  if (bigTxs.length > 0) {
+    riskScore += 20;
+    signals.push({
+      type: 'warning',
+      icon: '🟠',
+      title: 'Grote verkooptransacties',
+      desc: `${bigTxs.length} grote uitstroom-transactie(s) gedetecteerd. Controleer of deze samenvallen met promotie-activiteit op social media.`
+    });
+  }
+
+  // Signaal 5: Gezond gedrag
+  if (riskScore === 0 || (inflows.length > 0 && outflows.length === 0)) {
+    riskScore = Math.max(riskScore, 5);
+    signals.push({
+      type: 'safe',
+      icon: '🟢',
+      title: 'Geen dump-signalen gevonden',
+      desc: `Geen grote uitstromen of verdachte verkooppatronen in de afgelopen 30 dagen. Het gedrag lijkt consistent met een HODL-strategie.`
+    });
+  }
+
+  // Signaal 6: Ethisch handelen — transparantie check
+  if (txs.length < 3) {
+    signals.push({
+      type: 'warning',
+      icon: '⚠️',
+      title: 'Te weinig data',
+      desc: 'Minder dan 3 transacties gevonden. Mogelijk een nieuw of zelden gebruikt adres — voorzichtigheid geboden.'
+    });
+    riskScore += 10;
+  }
+
+  riskScore = Math.min(100, Math.max(0, riskScore));
+  return { signals, riskScore, netFlow, totalOut, totalIn, recentTxs, outflows };
+}
+
+function riskLevel(score) {
+  if (score < 30) return { label: 'Laag risico', cls: 'low' };
+  if (score < 60) return { label: 'Matig risico', cls: 'medium' };
+  return { label: 'Hoog risico', cls: 'high' };
+}
+
+function buildTimeline(txs, handle, chain) {
+  if (txs.length === 0) return '<div style="color:#555;font-size:0.8rem;padding:8px 0;">Geen recente transacties</div>';
+
+  const items = txs.slice(0, 8).map(tx => {
+    const isOut = tx.delta < 0;
+    const dotCls = isOut ? 'sell' : 'buy';
+    const amtStr = chain === 'btc'
+      ? (Math.abs(tx.delta)/1e8).toFixed(4) + ' BTC'
+      : Math.abs(tx.delta).toFixed(4) + ' ETH';
+    const direction = isOut ? 'Verkoop' : 'Aankoop';
+    const flagHtml = isOut
+      ? '<span class="timeline-flag flag-dump">VERKOOP</span>'
+      : '<span class="timeline-flag flag-clean">AANKOOP</span>';
+    return `
+      <div class="timeline-item">
+        <div class="timeline-dot ${dotCls}"></div>
+        <div class="timeline-text">
+          <div class="timeline-event">${direction}: ${amtStr}</div>
+          <div class="timeline-meta">${fmtTimeAgo(tx.time)} &bull; ${tx.txid.slice(0,14)}...</div>
+        </div>
+        ${flagHtml}
+      </div>`;
+  });
+
+  // Voeg fictieve sociale media post toe bovenaan als voorbeeld
+  const socialEntry = `
+    <div class="timeline-item">
+      <div class="timeline-dot post"></div>
+      <div class="timeline-text">
+        <div class="timeline-event">📣 ${handle} — Laatste sociale activiteit</div>
+        <div class="timeline-meta">Controleer handmatig op X/Twitter voor posts rondom verkooptijdstippen</div>
+      </div>
+      <span class="timeline-flag flag-suspect">CONTROLEER</span>
+    </div>`;
+
+  return socialEntry + items.join('');
+}
+
+async function runInfluencerScan() {
+  const handle  = document.getElementById('scanHandle').value.trim();
+  const addr    = document.getElementById('scanAddress').value.trim();
+  const chain   = selectedChain;
+
+  if (!handle || !addr) {
+    alert('Vul zowel de Twitter handle als het blockchain adres in.');
+    return;
+  }
+  const detectedChain = detectChain(addr);
+  if (!detectedChain) {
+    alert('Ongeldig blockchain adres. Controleer het adres en probeer opnieuw.');
+    return;
+  }
+
+  const btn = document.getElementById('scanBtn');
+  btn.disabled = true;
+  btn.textContent = 'Analyseren...';
+
+  document.getElementById('scanResult').innerHTML = `
+    <div class="card"><div class="empty-state">
+      <span class="loading-spinner"></span>
+      <span style="color:#666;font-size:0.85rem;">On-chain data ophalen en analyseren...</span>
+    </div></div>`;
+
+  try {
+    let walletData;
+    if (detectedChain === 'btc') {
+      walletData = await fetchBtcWallet(addr);
+    } else {
+      walletData = await fetchEthWallet(addr);
+    }
+
+    const { signals, riskScore, netFlow, totalOut, totalIn, recentTxs, outflows } =
+      analyseTransactions(walletData.txs, detectedChain);
+
+    const risk     = riskLevel(riskScore);
+    const cleanHandle = handle.startsWith('@') ? handle : '@' + handle;
+    const symbol   = detectedChain === 'btc' ? 'BTC' : 'ETH';
+    const balFmt   = detectedChain === 'btc'
+      ? (walletData.balance / 1e8).toFixed(4) + ' BTC'
+      : parseFloat(walletData.balance).toFixed(4) + ' ETH';
+
+    const signalsHtml = signals.map(s => `
+      <li class="signal-item ${s.type}">
+        <div class="signal-icon">${s.icon}</div>
+        <div>
+          <div class="signal-title">${s.title}</div>
+          <div class="signal-desc">${s.desc}</div>
+        </div>
+      </li>`).join('');
+
+    const timelineHtml = buildTimeline(walletData.txs, cleanHandle, detectedChain);
+
+    document.getElementById('scanResult').innerHTML = `
+      <div class="card risk-card">
+        <div class="risk-header">
+          <div class="influencer-info">
+            <div class="influencer-handle">${cleanHandle}</div>
+            <div class="influencer-sub">${addr.slice(0,10)}...${addr.slice(-6)} &bull; ${symbol}</div>
+            <div class="influencer-sub" style="margin-top:4px;">Saldo: ${balFmt} &bull; ${walletData.txCount} transacties</div>
+          </div>
+          <div class="risk-score-wrap">
+            <div class="risk-score ${risk.cls}">${riskScore}</div>
+            <div class="risk-label-text">${risk.label}</div>
+          </div>
+        </div>
+
+        <div class="risk-bar-wrap">
+          <div class="risk-bar-bg">
+            <div class="risk-bar-needle" style="left:${riskScore}%"></div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="section-title" style="margin-bottom:8px;">Gedetecteerde signalen</div>
+        <ul class="signals-list">${signalsHtml}</ul>
+      </div>
+
+      <div class="card">
+        <div class="section-title" style="margin-bottom:8px;">Transactietijdlijn (30 dagen)</div>
+        <div class="hint-text" style="margin-bottom:12px;">
+          Vergelijk verkooptijdstippen met social media posts om dump-gedrag te bevestigen
+        </div>
+        ${timelineHtml}
+      </div>
+
+      <div class="info-banner" style="margin-bottom:0;">
+        <strong>Methodologie:</strong> Dit algoritme analyseert uitsluitend publieke blockchain-data.
+        Risicoscores zijn gebaseerd op transactiepatronen (verkoopfrequentie, uitstroomratio, portemonnee-retentie).
+        Correlatie met social media posts vereist handmatige verificatie op Twitter/X.
+        Een hoge score is een indicatie — geen bewijs van wangedrag.
+      </div>`;
+
+  } catch(e) {
+    document.getElementById('scanResult').innerHTML = `
+      <div class="card"><div class="empty-state">
+        <div class="empty-icon">❌</div>
+        <div class="empty-text">Fout bij ophalen data: ${e.message}</div>
+      </div></div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Analyseer gedrag';
+  }
+}
+
+document.getElementById('scanHandle').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('scanAddress').focus();
+});
+document.getElementById('scanAddress').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runInfluencerScan();
+});
 </script>
 
 </body>

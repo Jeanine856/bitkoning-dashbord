@@ -251,6 +251,7 @@
     }
     .badge-btc { background: #f7931a22; color: #f7931a; }
     .badge-eth { background: #627eea22; color: #627eea; }
+    .badge-sol { background: #9945ff22; color: #9945ff; }
 
     .stat-grid {
       display: grid;
@@ -563,7 +564,7 @@
           placeholder="BTC of ETH adres..." />
         <button class="btn-primary" id="walletSearchBtn" onclick="searchWallet()">Zoek</button>
       </div>
-      <div class="hint-text">Bijv. een Bitcoin (bc1...) of Ethereum (0x...) adres</div>
+      <div class="hint-text">Bijv. een Bitcoin (bc1...), Ethereum (0x...) of Solana adres</div>
     </div>
   </div>
 
@@ -605,6 +606,7 @@
         <div class="coin-select-row" id="chainSelect">
           <button class="coin-btn active" data-chain="btc" onclick="selectChain('btc')">₿ Bitcoin</button>
           <button class="coin-btn" data-chain="eth" onclick="selectChain('eth')">Ξ Ethereum</button>
+          <button class="coin-btn" data-chain="sol" onclick="selectChain('sol')">◎ Solana</button>
         </div>
       </div>
 
@@ -629,6 +631,7 @@
 <footer>
   Data via <a href="https://www.coingecko.com" target="_blank">CoinGecko</a>
   &bull; <a href="https://mempool.space" target="_blank">Mempool.space</a>
+  &bull; <a href="https://solscan.io" target="_blank">Solscan</a>
   &bull; prijs elke 30s
 </footer>
 
@@ -770,6 +773,7 @@ setInterval(() => fetchChart(currentDays), 300000);
 function detectChain(addr) {
   if (/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,62}$/.test(addr)) return 'btc';
   if (/^0x[0-9a-fA-F]{40}$/.test(addr)) return 'eth';
+  if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(addr)) return 'sol';
   return null;
 }
 
@@ -815,6 +819,31 @@ async function fetchBtcWallet(addr) {
   return { chain: 'btc', balance, txCount, funded, spent, txs };
 }
 
+async function fetchSolWallet(addr) {
+  const [acctRes, txRes] = await Promise.all([
+    fetch(`https://public-api.solscan.io/account/${addr}`, { headers: { 'accept': 'application/json' } }),
+    fetch(`https://public-api.solscan.io/account/transactions?account=${addr}&limit=10`, { headers: { 'accept': 'application/json' } })
+  ]);
+  if (!acctRes.ok) throw new Error('Solana adres niet gevonden');
+  const acctData = await acctRes.json();
+  const txData   = txRes.ok ? await txRes.json() : [];
+
+  const lamports = acctData.lamports || 0;
+  const balance  = lamports / 1e9;
+
+  const txs = (Array.isArray(txData) ? txData : []).slice(0, 10).map(tx => {
+    const change = tx.change ? tx.change / 1e9 : 0;
+    return {
+      txid: tx.txHash || tx.signature || '?',
+      delta: change,
+      time: tx.blockTime || Math.floor(Date.now() / 1000),
+      confirmed: true
+    };
+  });
+
+  return { chain: 'sol', balance, txCount: acctData.transactionCount || txs.length, txs };
+}
+
 async function fetchEthWallet(addr) {
   const res = await fetch(`https://api.ethplorer.io/getAddressInfo/${addr}?apiKey=freekey`);
   if (!res.ok) throw new Error('Adres niet gevonden');
@@ -838,11 +867,13 @@ async function fetchEthWallet(addr) {
 
 function renderWalletResult(data, addr) {
   const chain  = data.chain;
-  const symbol = chain === 'btc' ? 'BTC' : 'ETH';
-  const icon   = chain === 'btc' ? '₿' : 'Ξ';
+  const symbol = chain === 'btc' ? 'BTC' : chain === 'eth' ? 'ETH' : 'SOL';
+  const icon   = chain === 'btc' ? '₿' : chain === 'eth' ? 'Ξ' : '◎';
   const balFmt = chain === 'btc'
     ? (data.balance / 1e8).toFixed(6) + ' BTC'
-    : parseFloat(data.balance).toFixed(6) + ' ETH';
+    : chain === 'eth'
+    ? parseFloat(data.balance).toFixed(6) + ' ETH'
+    : parseFloat(data.balance).toFixed(4) + ' SOL';
 
   const shortAddr = addr.slice(0, 8) + '...' + addr.slice(-6);
 
@@ -856,7 +887,9 @@ function renderWalletResult(data, addr) {
       const dir   = isIn ? 'in' : 'out';
       const amtStr = chain === 'btc'
         ? (Math.abs(tx.delta)/1e8).toFixed(6) + ' BTC'
-        : Math.abs(tx.delta).toFixed(4) + ' ETH';
+        : chain === 'eth'
+        ? Math.abs(tx.delta).toFixed(4) + ' ETH'
+        : Math.abs(tx.delta).toFixed(4) + ' SOL';
       const prefix = isIn ? '+' : '-';
       return `
         <li class="tx-item">
@@ -899,6 +932,14 @@ function renderWalletResult(data, addr) {
         <div class="stat-box">
           <div class="stat-label">Verstuurd</div>
           <div class="stat-value red">${(data.spent/1e8).toFixed(4)} BTC</div>
+        </div>` : chain === 'sol' ? `
+        <div class="stat-box">
+          <div class="stat-label">Netwerk</div>
+          <div class="stat-value" style="color:#9945ff;">Solana</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Saldo (SOL)</div>
+          <div class="stat-value orange">${parseFloat(data.balance).toFixed(4)}</div>
         </div>` : ''}
       </div>
 
@@ -931,7 +972,9 @@ async function searchWallet() {
   try {
     const data = chain === 'btc'
       ? await fetchBtcWallet(addr)
-      : await fetchEthWallet(addr);
+      : chain === 'eth'
+      ? await fetchEthWallet(addr)
+      : await fetchSolWallet(addr);
     renderWalletResult(data, addr);
   } catch(e) {
     document.getElementById('walletResult').innerHTML = `
@@ -1018,7 +1061,8 @@ function analyseTransactions(txs, chain) {
   }
 
   // Signaal 4: Recente grote transactie vlak voor/na posting
-  const bigTxs = outflows.filter(tx => Math.abs(tx.delta) > (chain === 'btc' ? 0.1e8 : 0.5));
+  const bigThreshold = chain === 'btc' ? 0.1e8 : chain === 'sol' ? 10 : 0.5;
+  const bigTxs = outflows.filter(tx => Math.abs(tx.delta) > bigThreshold);
   if (bigTxs.length > 0) {
     riskScore += 20;
     signals.push({
@@ -1069,7 +1113,9 @@ function buildTimeline(txs, handle, chain) {
     const dotCls = isOut ? 'sell' : 'buy';
     const amtStr = chain === 'btc'
       ? (Math.abs(tx.delta)/1e8).toFixed(4) + ' BTC'
-      : Math.abs(tx.delta).toFixed(4) + ' ETH';
+      : chain === 'eth'
+      ? Math.abs(tx.delta).toFixed(4) + ' ETH'
+      : Math.abs(tx.delta).toFixed(4) + ' SOL';
     const direction = isOut ? 'Verkoop' : 'Aankoop';
     const flagHtml = isOut
       ? '<span class="timeline-flag flag-dump">VERKOOP</span>'
@@ -1128,8 +1174,10 @@ async function runInfluencerScan() {
     let walletData;
     if (detectedChain === 'btc') {
       walletData = await fetchBtcWallet(addr);
-    } else {
+    } else if (detectedChain === 'eth') {
       walletData = await fetchEthWallet(addr);
+    } else {
+      walletData = await fetchSolWallet(addr);
     }
 
     const { signals, riskScore, netFlow, totalOut, totalIn, recentTxs, outflows } =
@@ -1137,10 +1185,12 @@ async function runInfluencerScan() {
 
     const risk     = riskLevel(riskScore);
     const cleanHandle = handle.startsWith('@') ? handle : '@' + handle;
-    const symbol   = detectedChain === 'btc' ? 'BTC' : 'ETH';
+    const symbol   = detectedChain === 'btc' ? 'BTC' : detectedChain === 'eth' ? 'ETH' : 'SOL';
     const balFmt   = detectedChain === 'btc'
       ? (walletData.balance / 1e8).toFixed(4) + ' BTC'
-      : parseFloat(walletData.balance).toFixed(4) + ' ETH';
+      : detectedChain === 'eth'
+      ? parseFloat(walletData.balance).toFixed(4) + ' ETH'
+      : parseFloat(walletData.balance).toFixed(4) + ' SOL';
 
     const signalsHtml = signals.map(s => `
       <li class="signal-item ${s.type}">
